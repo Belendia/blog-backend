@@ -13,6 +13,10 @@ const postSchema = new Schema(
       required: true,
     },
     content: {
+      type: String,
+      required: true,
+    },
+    creator: {
       type: Object,
       required: true,
     },
