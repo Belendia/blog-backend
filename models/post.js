@@ -22,7 +22,7 @@ const postSchema = new Schema(
     },
   },
   {
-    timestamp: true, // this will make mongoose to add timestamp (createdAt and updatedAt) fields automatically
+    timestamps: { createdAt: true, updatedAt: true }, // this will make mongoose to add timestamp (createdAt and updatedAt) fields automatically
   }
 );
 
