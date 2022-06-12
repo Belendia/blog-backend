@@ -196,7 +196,15 @@ exports.deletePost = (req, res, next) => {
       return Post.findByIdAndRemove(postId);
     })
     .then((result) => {
-      console.log(result);
+      // if post is removed, we should break its relationship with user
+      return User.findById(req.userId);
+    })
+    .then((user) => {
+      // pull out the post id that is just being removed from user model
+      user.posts.pull(postId);
+      return user.save();
+    })
+    .then((result) => {
       res.status(200).json({ message: "Deleted post." });
     })
     .catch((err) => {
