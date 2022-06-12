@@ -143,7 +143,7 @@ exports.updatePost = (req, res, next) => {
       }
 
       // a user should update his/her own post
-      if (post.creator.toString() !== req.userid) {
+      if (post.creator.toString() !== req.userId) {
         const error = new Error("Not authroized!");
         error.statusCode = 403;
         throw error;
@@ -185,7 +185,7 @@ exports.deletePost = (req, res, next) => {
       }
 
       // a user should delete his/her own post
-      if (post.creator.toString() !== req.userid) {
+      if (post.creator.toString() !== req.userId) {
         const error = new Error("Not authroized!");
         error.statusCode = 403;
         throw error;
