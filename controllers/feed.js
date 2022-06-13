@@ -14,6 +14,7 @@ exports.getPosts = (req, res, next) => {
     .then((count) => {
       totalItems = count;
       return Post.find()
+        .populate("creator")
         .skip((currentPage - 1) * perPage)
         .limit(perPage);
     })
@@ -30,6 +31,29 @@ exports.getPosts = (req, res, next) => {
       }
       next(err);
     });
+};
+
+exports.getPostsUsingAsycAwait = async (req, res, next) => {
+  const currentPage = req.query.page || 1;
+  const perPage = 2;
+  try {
+    const totalItems = await Post.find().countDocuments();
+    const posts = await Post.find()
+      .populate("creator")
+      .skip((currentPage - 1) * perPage)
+      .limit(perPage);
+
+    res.status(200).json({
+      message: "Fetched posts successfully.",
+      posts: posts,
+      totalItems: totalItems,
+    });
+  } catch (err) {
+    if (!err.statusCode) {
+      err.statusCode = 500;
+    }
+    next(err); // we used this because the async-await will transform to then...catch like the above function (i.e. getPosts)
+  }
 };
 
 exports.createPost = (req, res, next) => {
