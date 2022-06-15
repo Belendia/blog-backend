@@ -3,7 +3,9 @@ const fs = require("fs");
 const path = require("path");
 
 const Post = require("../models/post");
+const user = require("../models/user");
 const User = require("../models/user");
+const io = require("../socket");
 
 exports.getPosts = (req, res, next) => {
   const currentPage = req.query.page || 1;
@@ -85,6 +87,13 @@ exports.createPost = (req, res, next) => {
   post
     .save()
     .then((result) => {
+      // emit sends to all connected clients that a new post is added
+      // posts is the event name and can be named anything
+      // the second parameter is data and can be defined in any format
+      io.getIO().emit("posts", {
+        action: "create",
+        post: { ...post_doc, creator: { _id: req.userId, name: user.name } },
+      });
       // we did this because we want to store the post in the user model as well.
       return User.findById(req.userId);
     })
@@ -159,6 +168,7 @@ exports.updatePost = (req, res, next) => {
   }
 
   Post.findById(postId)
+    .populate("creator")
     .then((post) => {
       if (!post) {
         const error = new Error("Could not find post.");
@@ -167,7 +177,7 @@ exports.updatePost = (req, res, next) => {
       }
 
       // a user should update his/her own post
-      if (post.creator.toString() !== req.userId) {
+      if (post.creator._id.toString() !== req.userId) {
         const error = new Error("Not authroized!");
         error.statusCode = 403;
         throw error;
@@ -184,6 +194,12 @@ exports.updatePost = (req, res, next) => {
       return post.save();
     })
     .then((result) => {
+      // emit an event to let every know that a post is updated.
+      io.getIO().emit("posts", {
+        action: "update",
+        post: result,
+      });
+
       res.status(200).json({
         message: "Post updated!",
         post: result,
@@ -209,7 +225,7 @@ exports.deletePost = (req, res, next) => {
       }
 
       // a user should delete his/her own post
-      if (post.creator.toString() !== req.userId) {
+      if (post.creator._id.toString() !== req.userId) {
         const error = new Error("Not authroized!");
         error.statusCode = 403;
         throw error;

@@ -2,3 +2,5 @@ node_modules
 
 # uploaded images
 images/
+
+.DS_Store
