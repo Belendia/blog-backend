@@ -17,6 +17,7 @@ exports.getPosts = (req, res, next) => {
       totalItems = count;
       return Post.find()
         .populate("creator")
+        .sort({ createdAt: -1 })
         .skip((currentPage - 1) * perPage)
         .limit(perPage);
     })
@@ -42,6 +43,7 @@ exports.getPostsUsingAsycAwait = async (req, res, next) => {
     const totalItems = await Post.find().countDocuments();
     const posts = await Post.find()
       .populate("creator")
+      .sort({ createdAt: -1 })
       .skip((currentPage - 1) * perPage)
       .limit(perPage);
 
@@ -92,7 +94,7 @@ exports.createPost = (req, res, next) => {
       // the second parameter is data and can be defined in any format
       io.getIO().emit("posts", {
         action: "create",
-        post: { ...post_doc, creator: { _id: req.userId, name: user.name } },
+        post: { ...post._doc, creator: { _id: req.userId, name: user.name } },
       });
       // we did this because we want to store the post in the user model as well.
       return User.findById(req.userId);
