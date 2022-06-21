@@ -4,6 +4,7 @@ const mongoose = require("mongoose");
 const path = require("path");
 const multer = require("multer");
 const helmet = require("helmet");
+const compression = require("compression");
 require("dotenv").config();
 
 const feedRoutes = require("./routes/feed");
@@ -12,6 +13,7 @@ const authRoutes = require("./routes/auth");
 const app = express();
 
 app.use(helmet());
+app.use(compression());
 
 const fileStorage = multer.diskStorage({
   destination: (req, file, callback) => {
